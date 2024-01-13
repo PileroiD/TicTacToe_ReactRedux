@@ -1,14 +1,18 @@
-import React from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import "./block.css";
 
-function Block({ value, onClick }) {
-    return (
-        <div className="block" onClick={onClick}>
-            {value}
-        </div>
-    );
+class Block extends Component {
+    render() {
+        const { value, onClick } = this.props;
+
+        return (
+            <div className="block" onClick={onClick}>
+                {value}
+            </div>
+        );
+    }
 }
 
 Block.propTypes = {

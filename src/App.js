@@ -1,13 +1,9 @@
-import "./App.css";
-import { useDispatch, useSelector } from "react-redux";
+// import "./App.css";
+import { connect } from "react-redux";
+import { Component } from "react";
 
 import Block from "./components/block/block";
 import { checkWinner } from "./utils/utils";
-import {
-    selectBlocks,
-    selectCurrentSign,
-    selectWinner,
-} from "./selectors/selectors";
 import {
     setBlocks,
     setWinner,
@@ -15,20 +11,20 @@ import {
     START_OVER,
 } from "./actions/actions";
 
-function App() {
-    const currentSign = useSelector(selectCurrentSign);
-    const winner = useSelector(selectWinner);
-    const blocks = useSelector(selectBlocks);
-
-    const dispatch = useDispatch();
-
-    let status = winner ? `Winner: ${winner}` : `Next player: ${currentSign}`;
-
-    function startOver() {
-        dispatch(START_OVER);
+class AppContainer extends Component {
+    constructor(props) {
+        super(props);
+        this.startOver = this.startOver.bind(this);
+        this.handleClick = this.handleClick.bind(this);
     }
 
-    function handleClick(index) {
+    startOver() {
+        this.props.dispatch(START_OVER);
+    }
+
+    handleClick(index) {
+        const { blocks, currentSign, winner, dispatch } = this.props;
+
         if (!blocks[index] && !winner) {
             const newBlocks = [...blocks];
             newBlocks[index] = currentSign;
@@ -43,37 +39,56 @@ function App() {
         }
     }
 
-    return (
-        <AppLayout
-            status={status}
-            startOver={startOver}
-            handleClick={handleClick}
-        />
-    );
+    render() {
+        this.status = this.props.winner
+            ? `Winner: ${this.props.winner}`
+            : `Next player: ${this.props.currentSign}`;
+
+        return (
+            <AppLayout
+                status={this.status}
+                startOver={this.startOver}
+                handleClick={this.handleClick}
+                blocks={this.props.blocks}
+            />
+        );
+    }
 }
 
-function AppLayout({ status, startOver, handleClick }) {
-    const blocks = useSelector(selectBlocks);
+class AppLayout extends Component {
+    render() {
+        const { status, startOver, handleClick, blocks } = this.props;
 
-    return (
-        <>
-            <div className="status">{status}</div>
-            <div onClick={() => startOver()} className="start-over">
-                Start Over
-            </div>
-            <div className="App">
-                <div className="board">
-                    {blocks.map((value, index) => (
-                        <Block
-                            key={index}
-                            value={value}
-                            onClick={() => handleClick(index)}
-                        />
-                    ))}
+        return (
+            <>
+                <div className="text-center mt-12 text-4xl text-white">
+                    {status}
                 </div>
-            </div>
-        </>
-    );
+                <div onClick={() => startOver()} className="start-over">
+                    Start Over
+                </div>
+                <div className="App">
+                    <div className="flex flex-wrap">
+                        {blocks.map((value, index) => (
+                            <Block
+                                key={index}
+                                value={value}
+                                onClick={() => handleClick(index)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </>
+        );
+    }
 }
+
+const mapStateToProps = (state) => ({
+    currentSign: state.currentSign,
+    winner: state.winner,
+    blocks: state.blocks,
+});
+
+const App = connect(mapStateToProps)(AppContainer);
 
 export default App;
